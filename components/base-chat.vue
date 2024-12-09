@@ -2,7 +2,7 @@
 const channel = useSocketChannel()
 
 const message = ref('')
-const chats = ref<string[]>([])
+const chats = ref<{type: 'me' | 'other', text: string}[]>([{type: 'other', text: '쉽쉬'}])
 
 onMounted(()=> {
   channel
@@ -10,7 +10,7 @@ onMounted(()=> {
       'broadcast',
       { event: 'chat' },
       ({payload: {message}}) => {
-        chats.value.push(message)
+        chats.value.push({type: 'other', text: message})
       }
     )
 })
@@ -26,7 +26,7 @@ function sendMessage() {
     payload: { message: message.value },
   })
 
-  chats.value.push(message.value)
+  chats.value.push({type: 'me', text: message.value})
   message.value = '';
 }
 
@@ -40,9 +40,9 @@ function sendMessage() {
       <button type="submit">Send</button>
     </form>
 
-    <div>
-      <div v-for="chat, index in chats" :key="index">
-        {{ chat }}
+    <div class="flex flex-col gap-2 py-2">
+      <div v-for="chat, index in chats" :key="index" :class="`px-2 py-0.5 rounded bg-slate-100 ${chat.type === 'me' ? 'ml-auto' : 'mr-auto bg-yellow-100'}`">
+        {{ chat.text }}
       </div>
     </div>
   </div>

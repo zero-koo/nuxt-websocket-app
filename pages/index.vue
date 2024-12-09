@@ -2,8 +2,9 @@
 </script>
 
 <template>
-  <div class="flex justify-center py-2">
+  <div class="flex items-center py-2 flex-col">
     <MoonLightBoard />
+    <BaseChat />
   </div>
 </template>
 
