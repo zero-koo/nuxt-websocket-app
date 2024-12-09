@@ -70,7 +70,7 @@ onMounted(() => {
         v-for="cell, cIndex in row"
         :key="cIndex"
         :style="`background-color: ${cell}`"
-        :class="`w-[12.5%] h-full flex justify-center items-center ${lastMovedCoord?.r === rIndex && lastMovedCoord?.c === cIndex && 'shadow-inner'}`"
+        :class="`w-[12.5%] h-full flex justify-center items-center`"
         @click="() => {
           if (!selectedCoord) return
           if (state[rIndex][cIndex]) return
@@ -89,7 +89,7 @@ onMounted(() => {
         }"
       >
         <button
-          v-if="state[rIndex][cIndex]" class="flex items-center justify-center size-[80%] rounded-full shadow-xl focus:scale-110" :style="`background-color: ${state[rIndex][cIndex].split('_')[0] === 'B' ? 'black' : 'white'}`"
+          v-if="state[rIndex][cIndex]" :class="`flex items-center justify-center size-[80%] rounded-full shadow-xl focus:scale-110 ${lastMovedCoord?.r === rIndex && lastMovedCoord?.c === cIndex && 'outline outline-4 outline-blue-500'}`" :style="`background-color: ${state[rIndex][cIndex].split('_')[0] === 'B' ? 'black' : 'white'}`"
           @click.stop="() => selectedCoord = {r: rIndex, c: cIndex}"
           @blue="() => selectedCoord = null"
         >
