@@ -1,8 +1,5 @@
-<script setup lang="ts">
-</script>
-
 <template>
-  <div>
-    <BaseChat />
-  </div>
+  <NuxtLayout>
+    <NuxtPage />
+  </NuxtLayout>
 </template>

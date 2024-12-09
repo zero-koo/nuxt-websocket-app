@@ -1,60 +1,49 @@
 <script setup lang="ts">
-import { useSupabaseClient } from '~/composables/useSupabaseClient';
-
-const supabase = useSupabaseClient()
-
-const channelA = supabase.channel('room-1')
-
-onMounted(()=> {
-  // Subscribe to the Channel
-  channelA
-    .on(
-      'broadcast',
-      { event: 'test' },
-      (payload) => {
-        console.log({payload})
-      }
-    )
-
-  channelA.subscribe((status) => {
-    // Wait for successful connection
-    if (status !== 'SUBSCRIBED') {
-      return null
-    }
-
-    // Send a message once the client is subscribed
-    channelA.send({
-      type: 'broadcast',
-      event: 'test',
-      payload: { message: 'hello, world' },
-    })
-  })
-})
+const channel = useSocketChannel()
 
 const message = ref('')
+const chats = ref<string[]>([])
+
+onMounted(()=> {
+  channel
+    .on(
+      'broadcast',
+      { event: 'chat' },
+      ({payload: {message}}) => {
+        chats.value.push(message)
+      }
+    )
+})
 
 function sendMessage() {
   if (message.value == null || message.value === '') {
     return false
   }
 
-  channelA.send({
+  channel.send({
     type: 'broadcast',
-    event: 'test',
+    event: 'chat',
     payload: { message: message.value },
   })
 
+  chats.value.push(message.value)
   message.value = '';
 }
 
 </script>
 
 <template>
-  <div>
-    <h1>WebSocket - let's go</h1>
+  <div class="mt-2">
+    채팅
     <form @submit.prevent="sendMessage">
-      <input v-model="message">
+      <input v-model="message" class="border">
       <button type="submit">Send</button>
     </form>
+
+    <div>
+      <div v-for="chat, index in chats" :key="index">
+        {{ chat }}
+      </div>
+    </div>
   </div>
 </template>

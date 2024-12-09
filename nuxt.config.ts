@@ -9,4 +9,11 @@ export default defineNuxtConfig({
   },
   devtools: { enabled: true },
   modules: ['@vueuse/nuxt', '@nuxt/eslint'],
+  css: ['~/assets/css/main.css'],
+  postcss: {
+    plugins: {
+      tailwindcss: {},
+      autoprefixer: {},
+    },
+  },
 })
