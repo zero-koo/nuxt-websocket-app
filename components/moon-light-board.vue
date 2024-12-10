@@ -45,18 +45,6 @@ onMounted(() => {
       }
     )
 })
-
-// function handleMove(r: number, c: number) {
-//   if (!selectedCoord.value) return
-//   if (state.value[r][c]) return
-//   state.value[r][c] = state.value[selectedCoord.value.r][selectedCoord.value.c]
-//   state.value[selectedCoord.value.r][selectedCoord.value.c] = null
-//   lastMovedCoord = {
-//     r: r,
-//     c: c,
-//   }
-//   selectedCoord = null
-// }
 </script>
 
 <template>
@@ -89,11 +77,13 @@ onMounted(() => {
         }"
       >
         <button
-          v-if="state[rIndex][cIndex]" :class="`flex items-center justify-center size-[80%] rounded-full shadow-xl focus:scale-110 ${lastMovedCoord?.r === rIndex && lastMovedCoord?.c === cIndex && 'outline outline-4 outline-blue-500'}`" :style="`background-color: ${state[rIndex][cIndex].split('_')[0] === 'B' ? 'black' : 'white'}`"
+          v-if="state[rIndex][cIndex]" :class="`flex items-center justify-center size-[80%] rounded-full shadow-xl focus:scale-110`" :style="`background-color: ${state[rIndex][cIndex].split('_')[0] === 'B' ? 'black' : 'white'}`"
           @click.stop="() => selectedCoord = {r: rIndex, c: cIndex}"
           @blue="() => selectedCoord = null"
         >
-          <div class="size-[70%] rounded-full" :style="`background-color: ${state[rIndex][cIndex].split('_')[1]}`" />
+          <div class="flex items-center justify-center size-[70%] rounded-full" :style="`background-color: ${state[rIndex][cIndex].split('_')[1]}`">
+            <div v-if="lastMovedCoord?.r === rIndex && lastMovedCoord?.c === cIndex" class="size-[50%] rounded-full bg-blue-500" />
+          </div>
         </button>
       </div>
     </div>
