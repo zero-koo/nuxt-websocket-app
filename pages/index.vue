@@ -2,7 +2,7 @@
 </script>
 
 <template>
-  <div class="flex items-center py-2 flex-col">
+  <div class="flex items-center flex-col w-screen max-w-96 mx-auto h-full">
     <MoonLightBoard />
     <BaseChat />
   </div>

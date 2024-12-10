@@ -39,7 +39,6 @@ onMounted(() => {
       'broadcast',
       { event: 'move-stone' },
       ({ payload }) => {
-        console.log('?????', payload)
         state.value = payload.state
         lastMovedCoord.value = payload.lastMovedCoord
       }
@@ -48,7 +47,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="relative w-screen max-w-96 aspect-square bg-slate-400">
+  <div class="relative w-full aspect-square bg-slate-400">
     <div
       v-for="row, rIndex in BOARD"
       :key="rIndex"
