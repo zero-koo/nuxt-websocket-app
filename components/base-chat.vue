@@ -35,7 +35,7 @@ const reversedChats = computed(() => chats.value.toReversed())
 </script>
 
 <template>
-  <div class="mt-1 w-full flex flex-col flex-1 text-sm">
+  <div class="mt-1 w-full flex flex-col flex-1 text-sm overflow-auto">
     <div class="flex flex-col-reverse flex-1 gap-2 p-2 h-28 overflow-auto border rounded-sm">
       <div v-for="chat, index in reversedChats" :key="index" :class="`px-2 py-0.5 rounded bg-slate-100 ${chat.type === 'me' ? 'ml-auto' : 'mr-auto bg-yellow-100'}`">
         {{ chat.text }}
