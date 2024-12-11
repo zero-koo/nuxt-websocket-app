@@ -2,19 +2,24 @@
 import { ref } from 'vue'
 
 type Color = 'black' | 'white'
-type CellStateType = 'black' | 'white' | 'blocker'
 type CellState = {
-  type: CellStateType,
+  type: Color,
   order: number,
+} | {
+  type: 'blocker',
+} | {
+  type: 'occupied',
+  color: Color,
 } | null
 type BoardState = (CellState)[][]
 
+const SIZE = 9;
 const INITIAL_STATE: BoardState = [
   [null, null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null, null],
-  [null, null, null, null, {type: 'blocker', order: -1}, null, null, null, null],
+  [null, null, null, null, {type: 'blocker'}, null, null, null, null],
   [null, null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null, null],
@@ -67,20 +72,147 @@ onMounted(() => {
       }
     )
 })
+
+const evaluatedBoard = computed(() => evaluateOccupied(boardState.value)!)
+const countOccupied = computed<Record<Color, number>>(() => {
+  const count: Record<Color, number> = {
+    black: 0,
+    white: 0
+  }
+
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++ ) {
+      const cell = evaluatedBoard.value[r][c]
+      if (cell?.type === 'occupied') {
+        count[cell.color]++
+      }
+    }
+  }
+  return count
+})
+
+function evaluateOccupied(board: BoardState) {
+  const evaluated = board.map(row => [...row])
+  const visited = board.map(row => row.map(col => !!col))
+
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      if (visited[r][c]) continue
+
+      const result = search(r, c, board)
+      if (!result) continue
+
+      const { nodes, color } = result
+      nodes.forEach(([r, c]) => {
+        evaluated[r][c] = {
+          type: 'occupied',
+          color,  
+        }
+      })
+    }
+  }
+  return evaluated
+  
+  function search(r: number, c: number, board: BoardState) {
+    const queue: Array<[number, number]> = [[r, c]]
+
+    const adjacentWalls = new Set<'T' | 'B' | 'L' | 'R'>()
+    const adjacentStones = new Set<'black' | 'white'>()
+
+    const nodes: Array<[number, number]> = [[r, c]]
+    while (queue.length) {
+      const node = queue.shift()!
+      nodes.push(node)
+
+      const [r, c] = node
+
+      visited[r][c] = true
+
+      if (r - 1 >= 0) {
+        if (board[r - 1][c]?.type === 'black') {
+          adjacentStones.add('black')
+        }
+        if (board[r - 1][c]?.type === 'white') {
+          adjacentStones.add('white')
+        }
+        if (!visited[r - 1][c]) {
+          queue.push([r - 1, c])
+        } 
+      } else {
+        adjacentWalls.add('T')
+      }
+      
+      if (r + 1 < SIZE) {
+        if (board[r + 1][c]?.type === 'black') {
+          adjacentStones.add('black')
+        }
+        if (board[r + 1][c]?.type === 'white') {
+          adjacentStones.add('white')
+        }
+        if (!visited[r + 1][c]) {
+          queue.push([r + 1, c])
+        } 
+      } else {
+        adjacentWalls.add('B')
+      }
+
+      if (c - 1 >= 0) {
+        if (board[r][c - 1]?.type === 'black') {
+          adjacentStones.add('black')
+        }
+        if (board[r][c - 1]?.type === 'white') {
+          adjacentStones.add('white')
+        }
+        if (!visited[r][c - 1]) {
+          queue.push([r, c - 1])
+        }
+      } else {
+        adjacentWalls.add('L')
+      }
+
+      if (c + 1 < SIZE) {
+        if (board[r][c + 1]?.type === 'black') {
+          adjacentStones.add('black')
+        }
+        if (board[r][c + 1]?.type === 'white') {
+          adjacentStones.add('white')
+        }
+        if (!visited[r][c + 1]) {
+          queue.push([r, c + 1])
+        }
+      } else {
+        adjacentWalls.add('R')
+      }
+    }
+
+    if (adjacentWalls.size < 4 && adjacentStones.size === 1) {
+      return {
+        nodes,
+        color: Array.from(adjacentStones)[0]
+      }
+    }
+
+  }
+
+
+}
 </script>
 
 <template>
   <div class="w-full">
     GreatKindom
     <div :class="$style.board">
-      <div v-for="row, r in boardState" :key="r" :class="$style.row">
-        <button v-for="col, c in row" :key="c" :class="$style.cell" :disabled="boardState[r][c] !== null" @click="() => handleClick(r, c)">
-          <div v-if="boardState[r][c]?.type === 'blocker'" class="size-[80%] bg-red-500" />
-          <div v-else-if="boardState[r][c]?.type === 'black'" :class="[$style.stone, $style.black]">
-            {{ boardState[r][c].order }}
+      <div v-for="row, r in evaluatedBoard" :key="r" :class="$style.row">
+        <button v-for="col, c in row" :key="c" :class="$style.cell" :disabled="evaluatedBoard[r][c] !== null" @click="() => handleClick(r, c)">
+          <div v-if="evaluatedBoard[r][c]?.type === 'blocker'" class="size-[80%] bg-red-500" />
+          <div v-else-if="evaluatedBoard[r][c]?.type === 'black'" :class="[$style.stone, $style.black]">
+            {{ evaluatedBoard[r][c].order }}
           </div>
-          <div v-else-if="boardState[r][c]?.type === 'white'" :class="[$style.stone, $style.white]">
-            {{ boardState[r][c].order }}
+          <div v-else-if="evaluatedBoard[r][c]?.type === 'white'" :class="[$style.stone, $style.white]">
+            {{ evaluatedBoard[r][c].order }}
+          </div>
+          <div v-else-if="evaluatedBoard[r][c]?.type === 'occupied'" :style="`color: ${evaluatedBoard[r][c].color}`">
+            x
           </div>
         </button>
       </div>
@@ -98,6 +230,14 @@ onMounted(() => {
         <input v-model="singleMode" type="checkbox">
         <span>1인모드</span>
       </label>
+      <div>
+        <span>흑</span>
+        <span>{{ countOccupied.black }}</span>
+      </div>
+      <div>
+        <span>백</span>
+        <span>{{ countOccupied.white }}</span>
+      </div>
       <button :class="$style.back" @click="handleBack">뒤로</button>
     </div>
   </div>
