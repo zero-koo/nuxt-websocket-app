@@ -204,7 +204,7 @@ function evaluateOccupied(board: BoardState) {
     <div :class="$style.board">
       <div v-for="row, r in evaluatedBoard" :key="r" :class="$style.row">
         <button v-for="col, c in row" :key="c" :class="$style.cell" :disabled="evaluatedBoard[r][c] !== null" @click="() => handleClick(r, c)">
-          <div v-if="evaluatedBoard[r][c]?.type === 'blocker'" class="size-[80%] bg-red-500" />
+          <div v-if="evaluatedBoard[r][c]?.type === 'blocker'" class="size-4/5 bg-red-500" />
           <div v-else-if="evaluatedBoard[r][c]?.type === 'black'" :class="[$style.stone, $style.black]">
             {{ evaluatedBoard[r][c].order }}
           </div>

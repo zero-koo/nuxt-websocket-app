@@ -58,17 +58,17 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="relative w-full aspect-square bg-slate-400">
+  <div class="relative aspect-square w-full bg-slate-400">
     <div
       v-for="row, rIndex in BOARD"
       :key="rIndex"
-      class="flex w-full h-[12.5%]"
+      class="flex h-[12.5%] w-full"
     >
       <div
         v-for="cell, cIndex in row"
         :key="cIndex"
         :style="`background-color: ${COLOR_MAP[cell]}`"
-        class="w-[12.5%] h-full flex justify-center items-center"
+        class="flex h-full w-[12.5%] items-center justify-center"
         @click="() => {
           if (!selectedCoord) return
           if (state[rIndex][cIndex]) return
@@ -91,8 +91,8 @@ onMounted(() => {
           @click.stop="() => selectedCoord = {r: rIndex, c: cIndex}"
           @blue="() => selectedCoord = null"
         >
-          <div class="flex items-center justify-center shadow-inner shadow-gray-500 size-[70%] rounded-full" :style="`background-color: ${COLOR_MAP[state[rIndex][cIndex].split('_')[1]]}`">
-            <div v-if="lastMovedCoord?.r === rIndex && lastMovedCoord?.c === cIndex" class="size-[40%] rounded-full bg-blue-500" />
+          <div class="flex size-[70%] items-center justify-center rounded-full shadow-inner shadow-gray-500" :style="`background-color: ${COLOR_MAP[state[rIndex][cIndex].split('_')[1]]}`">
+            <div v-if="lastMovedCoord?.r === rIndex && lastMovedCoord?.c === cIndex" class="size-2/5 rounded-full bg-blue-500" />
           </div>
         </button>
       </div>
