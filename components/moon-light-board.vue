@@ -27,14 +27,14 @@ const INITIAL_STATE: (Stone | null)[][] = [
 ]
 
 const COLOR_MAP: Record<Color, string> = {
-  orange: '#FFB347',
-  blue: '#91C3DF',
-  purple: '#B19CD9',
-  pink: '#F4A6A6',
-  yellow: '#FDFD96',
-  red: '#FF6961',
-  green: '#77DD77',
-  brown: '#D1B6A1',
+  orange: '#FCC737',
+  blue: '#074799',
+  purple: '#8B5DFF',
+  pink: '#F19ED2',
+  yellow: '#FCFFC1',
+  red: '#F95454',
+  green: '#118B50',
+  brown: '#AB886D',
 }
 
 const state = ref<(Stone | null)[][]>(INITIAL_STATE.map(row => ([...row])))
