@@ -4,9 +4,9 @@ import { createClient } from '@supabase/supabase-js'
 
 export const useSupabaseClient = () => {
   // if (supabase !== null) return supabase
-  const {SUPABASE_URL, SUPABASE_KEY} = useRuntimeConfig().public
+  const { SUPABASE_URL, SUPABASE_KEY } = useRuntimeConfig().public
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
-  
+
   return supabase
 }

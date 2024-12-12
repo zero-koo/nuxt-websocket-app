@@ -2,24 +2,28 @@
 import { ref } from 'vue'
 
 type Color = 'black' | 'white'
-type CellState = {
-  type: Color,
-  order: number,
-} | {
-  type: 'blocker',
-} | {
-  type: 'occupied',
-  color: Color,
-} | null
-type BoardState = (CellState)[][]
+type CellState =
+  | {
+      type: Color
+      order: number
+    }
+  | {
+      type: 'blocker'
+    }
+  | {
+      type: 'occupied'
+      color: Color
+    }
+  | null
+type BoardState = CellState[][]
 
-const SIZE = 9;
+const SIZE = 9
 const INITIAL_STATE: BoardState = [
   [null, null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null, null],
-  [null, null, null, null, {type: 'blocker'}, null, null, null, null],
+  [null, null, null, null, { type: 'blocker' }, null, null, null, null],
   [null, null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null, null],
@@ -27,13 +31,16 @@ const INITIAL_STATE: BoardState = [
 ]
 
 const boardState = computed<BoardState>(() => {
-  return history.value.reduce((state, [r, c, color], index) => {
-    state[r][c] = {
-      type: color,
-      order: index + 1
-    }
-    return state
-  }, INITIAL_STATE.map(row => ([...row])))
+  return history.value.reduce(
+    (state, [r, c, color], index) => {
+      state[r][c] = {
+        type: color,
+        order: index + 1,
+      }
+      return state
+    },
+    INITIAL_STATE.map((row) => [...row])
+  )
 })
 
 const stone = ref<Color>('black')
@@ -63,25 +70,20 @@ function sendHistory() {
 
 const channel = useSocketChannel()
 onMounted(() => {
-  channel
-    .on(
-      'broadcast',
-      { event: 'change-history' },
-      ({ payload }) => {
-        history.value = payload.history
-      }
-    )
+  channel.on('broadcast', { event: 'change-history' }, ({ payload }) => {
+    history.value = payload.history
+  })
 })
 
 const evaluatedBoard = computed(() => evaluateOccupied(boardState.value)!)
 const countOccupied = computed<Record<Color, number>>(() => {
   const count: Record<Color, number> = {
     black: 0,
-    white: 0
+    white: 0,
   }
 
   for (let r = 0; r < SIZE; r++) {
-    for (let c = 0; c < SIZE; c++ ) {
+    for (let c = 0; c < SIZE; c++) {
       const cell = evaluatedBoard.value[r][c]
       if (cell?.type === 'occupied') {
         count[cell.color]++
@@ -92,8 +94,8 @@ const countOccupied = computed<Record<Color, number>>(() => {
 })
 
 function evaluateOccupied(board: BoardState) {
-  const evaluated = board.map(row => [...row])
-  const visited = board.map(row => row.map(col => !!col))
+  const evaluated = board.map((row) => [...row])
+  const visited = board.map((row) => row.map((col) => !!col))
 
   for (let r = 0; r < SIZE; r++) {
     for (let c = 0; c < SIZE; c++) {
@@ -106,13 +108,13 @@ function evaluateOccupied(board: BoardState) {
       nodes.forEach(([r, c]) => {
         evaluated[r][c] = {
           type: 'occupied',
-          color,  
+          color,
         }
       })
     }
   }
   return evaluated
-  
+
   function search(r: number, c: number, board: BoardState) {
     const queue: Array<[number, number]> = [[r, c]]
 
@@ -137,11 +139,11 @@ function evaluateOccupied(board: BoardState) {
         }
         if (!visited[r - 1][c]) {
           queue.push([r - 1, c])
-        } 
+        }
       } else {
         adjacentWalls.add('T')
       }
-      
+
       if (r + 1 < SIZE) {
         if (board[r + 1][c]?.type === 'black') {
           adjacentStones.add('black')
@@ -151,7 +153,7 @@ function evaluateOccupied(board: BoardState) {
         }
         if (!visited[r + 1][c]) {
           queue.push([r + 1, c])
-        } 
+        }
       } else {
         adjacentWalls.add('B')
       }
@@ -188,13 +190,10 @@ function evaluateOccupied(board: BoardState) {
     if (adjacentWalls.size < 4 && adjacentStones.size === 1) {
       return {
         nodes,
-        color: Array.from(adjacentStones)[0]
+        color: Array.from(adjacentStones)[0],
       }
     }
-
   }
-
-
 }
 </script>
 
@@ -202,16 +201,34 @@ function evaluateOccupied(board: BoardState) {
   <div class="w-full">
     GreatKindom
     <div :class="$style.board">
-      <div v-for="row, r in evaluatedBoard" :key="r" :class="$style.row">
-        <button v-for="col, c in row" :key="c" :class="$style.cell" :disabled="evaluatedBoard[r][c] !== null" @click="() => handleClick(r, c)">
-          <div v-if="evaluatedBoard[r][c]?.type === 'blocker'" class="size-4/5 bg-red-500" />
-          <div v-else-if="evaluatedBoard[r][c]?.type === 'black'" :class="[$style.stone, $style.black]">
+      <div v-for="(row, r) in evaluatedBoard" :key="r" :class="$style.row">
+        <button
+          v-for="(col, c) in row"
+          :key="c"
+          :class="$style.cell"
+          :disabled="evaluatedBoard[r][c] !== null"
+          @click="() => handleClick(r, c)"
+        >
+          <div
+            v-if="evaluatedBoard[r][c]?.type === 'blocker'"
+            class="size-4/5 bg-red-500"
+          />
+          <div
+            v-else-if="evaluatedBoard[r][c]?.type === 'black'"
+            :class="[$style.stone, $style.black]"
+          >
             {{ evaluatedBoard[r][c].order }}
           </div>
-          <div v-else-if="evaluatedBoard[r][c]?.type === 'white'" :class="[$style.stone, $style.white]">
+          <div
+            v-else-if="evaluatedBoard[r][c]?.type === 'white'"
+            :class="[$style.stone, $style.white]"
+          >
             {{ evaluatedBoard[r][c].order }}
           </div>
-          <div v-else-if="evaluatedBoard[r][c]?.type === 'occupied'" :style="`color: ${evaluatedBoard[r][c].color}`">
+          <div
+            v-else-if="evaluatedBoard[r][c]?.type === 'occupied'"
+            :style="`color: ${evaluatedBoard[r][c].color}`"
+          >
             x
           </div>
         </button>
@@ -219,15 +236,29 @@ function evaluateOccupied(board: BoardState) {
     </div>
     <div :class="$style.controls">
       <label>
-        <input type="radio" name="stone" value="black" :checked="stone === 'black'" :disabled="singleMode" @click="() => stone = 'black'">
+        <input
+          type="radio"
+          name="stone"
+          value="black"
+          :checked="stone === 'black'"
+          :disabled="singleMode"
+          @click="() => (stone = 'black')"
+        />
         <span>흑</span>
       </label>
       <label>
-        <input type="radio" name="stone" value="white" :checked="stone === 'white'" :disabled="singleMode" @click="() => stone = 'white'">
+        <input
+          type="radio"
+          name="stone"
+          value="white"
+          :checked="stone === 'white'"
+          :disabled="singleMode"
+          @click="() => (stone = 'white')"
+        />
         <span>백</span>
       </label>
       <label>
-        <input v-model="singleMode" type="checkbox">
+        <input v-model="singleMode" type="checkbox" />
         <span>1인모드</span>
       </label>
       <div>
@@ -244,59 +275,59 @@ function evaluateOccupied(board: BoardState) {
 </template>
 
 <style module>
-  .board {
-    @apply relative w-full aspect-square bg-stone-700 grid p-1 gap-1;
+.board {
+  @apply relative grid aspect-square w-full gap-1 bg-stone-700 p-1;
 
-    grid-template-columns: repeat(9, 1fr);
-    grid-template-rows: repeat(9, 1fr);
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(9, 1fr);
 
-    .row {
-      @apply grid grid-cols-subgrid;
-      grid-column: 1 / -1;
-      
-      .cell {
-        @apply relative aspect-square bg-stone-300 flex justify-center items-center;
+  .row {
+    @apply grid grid-cols-subgrid;
+    grid-column: 1 / -1;
 
-        .stone {
-          @apply relative shadow-md rounded-full flex items-center justify-center text-xs font-bold;
+    .cell {
+      @apply relative flex aspect-square items-center justify-center bg-stone-300;
 
-          width: 80%;
-          height: 80%;
+      .stone {
+        @apply relative flex items-center justify-center rounded-full text-xs font-bold shadow-md;
+
+        width: 80%;
+        height: 80%;
+
+        &::after {
+          content: '';
+          @apply absolute inset-0 rounded-full shadow-inner;
+        }
+
+        &.black {
+          @apply bg-stone-800 text-stone-100;
 
           &::after {
-            content: '';
-            @apply absolute inset-0 shadow-inner rounded-full;
+            @apply shadow-gray-300;
           }
+        }
 
-          &.black {
-            @apply bg-stone-800 text-stone-100;
+        &.white {
+          @apply bg-stone-50 text-stone-800;
 
-            &::after {
-              @apply shadow-gray-300;
-            }
-          }
-          
-          &.white {
-            @apply bg-stone-50 text-stone-800;
-
-            &::after {
-              @apply shadow-gray-500;
-            }
+          &::after {
+            @apply shadow-gray-500;
           }
         }
       }
     }
   }
+}
 
-  .controls {
-    @apply flex gap-1 p-1 items-center;
+.controls {
+  @apply flex items-center gap-1 p-1;
 
-    > label {
-      @apply flex gap-0.5 items-center;
-    }
-
-    .back {
-      @apply ml-auto rounded bg-slate-600 p-1 py-0.5 text-white;
-    }
+  > label {
+    @apply flex items-center gap-0.5;
   }
+
+  .back {
+    @apply ml-auto rounded bg-slate-600 p-1 py-0.5 text-white;
+  }
+}
 </style>
