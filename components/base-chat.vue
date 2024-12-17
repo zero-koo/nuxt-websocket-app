@@ -8,6 +8,11 @@ onMounted(() => {
   channel.on('broadcast', { event: 'chat' }, ({ payload: { message } }) => {
     chats.value.push({ type: 'other', text: message })
   })
+  channel.send({
+    type: 'broadcast',
+    event: 'chat',
+    payload: { message: '누군가 접속' },
+  })
 })
 
 function sendMessage() {
